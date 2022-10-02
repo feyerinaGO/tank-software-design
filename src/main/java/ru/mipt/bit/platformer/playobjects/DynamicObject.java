@@ -24,27 +24,44 @@ public class DynamicObject {
 
     public void rotate(List<StateObject> staticObstacles) {
         if (!isEqual(movementProgress, 1f)) { return; }
-        GridPoint2 coordinates = new GridPoint2(state.initialCoordinates);
-        float newRotation = state.rotation;
-        if (Gdx.input.isKeyPressed(UP) || Gdx.input.isKeyPressed(W)) {
-            coordinates.y++;
-            newRotation = 90f;
-        } else if (Gdx.input.isKeyPressed(LEFT) || Gdx.input.isKeyPressed(A)) {
-            coordinates.x--;
-            newRotation = -180f;
-        } else if (Gdx.input.isKeyPressed(DOWN) || Gdx.input.isKeyPressed(S)) {
-            coordinates.y--;
-            newRotation = -90f;
-        } else if (Gdx.input.isKeyPressed(RIGHT) || Gdx.input.isKeyPressed(D)) {
-            coordinates.x++;
-            newRotation = 0f;
-        }
-        state.rotation = newRotation;
+        GridPoint2 coordinates = getNewCoordinates(new GridPoint2(state.initialCoordinates));
+        state.rotation = getNewRotation(state.rotation);
+
         if (isNotObstacle(staticObstacles, coordinates)) {
             state.initialCoordinates.set(coordinates);
             movementProgress = 0f;
         }
     }
+
+    private static GridPoint2 getNewCoordinates(GridPoint2 coordinates) {
+        if (Gdx.input.isKeyPressed(UP) || Gdx.input.isKeyPressed(W)) {
+            coordinates.y++;
+        } else if (Gdx.input.isKeyPressed(LEFT) || Gdx.input.isKeyPressed(A)) {
+            coordinates.x--;
+        } else if (Gdx.input.isKeyPressed(DOWN) || Gdx.input.isKeyPressed(S)) {
+            coordinates.y--;
+        } else if (Gdx.input.isKeyPressed(RIGHT) || Gdx.input.isKeyPressed(D)) {
+            coordinates.x++;
+        }
+        return coordinates;
+    }
+
+    private static float getNewRotation(float newRotation) {
+        if (Gdx.input.isKeyPressed(UP) || Gdx.input.isKeyPressed(W)) {
+            return 90f;
+        }
+        if (Gdx.input.isKeyPressed(LEFT) || Gdx.input.isKeyPressed(A)) {
+            return -180f;
+        }
+        if (Gdx.input.isKeyPressed(DOWN) || Gdx.input.isKeyPressed(S)) {
+            return -90f;
+        }
+        if (Gdx.input.isKeyPressed(RIGHT) || Gdx.input.isKeyPressed(D)) {
+            return 0f;
+        }
+        return newRotation;
+    }
+
     private boolean isNotObstacle(List<StateObject> staticObstacles, GridPoint2 coordinates) {
         for (StateObject obstacle : staticObstacles) {
             if (obstacle.initialCoordinates.equals(coordinates)) {
