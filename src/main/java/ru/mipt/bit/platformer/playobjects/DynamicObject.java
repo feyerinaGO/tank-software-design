@@ -1,12 +1,11 @@
 package ru.mipt.bit.platformer.playobjects;
 
-import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.GridPoint2;
+import ru.mipt.bit.platformer.moving.ContextMove;
 
 import java.util.List;
 
-import static com.badlogic.gdx.Input.Keys.*;
-import static com.badlogic.gdx.Input.Keys.D;
 import static com.badlogic.gdx.math.MathUtils.isEqual;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.continueProgress;
 
@@ -22,44 +21,20 @@ public class DynamicObject {
         this.coordinates = new GridPoint2(this.state.initialCoordinates);
     }
 
-    public void rotate(List<StateObject> staticObstacles) {
+    public void getNewPosition(List<StateObject> staticObstacles, Input input, boolean player) {
         if (!isEqual(movementProgress, 1f)) { return; }
-        GridPoint2 coordinates = getNewCoordinates(new GridPoint2(state.initialCoordinates));
-        state.rotation = getNewRotation(state.rotation);
+        if (player) {
+            ContextMove.setContext(ContextMove.PLAYER);
+        } else {
+            ContextMove.setContext(ContextMove.ENEMY);
+        }
+        GridPoint2 coordinates = ContextMove.getNewCoordinates(input, new GridPoint2(state.initialCoordinates));
+        state.rotation = ContextMove.getNewRotation(input, state.rotation);
 
         if (isNotObstacle(staticObstacles, coordinates)) {
             state.initialCoordinates.set(coordinates);
             movementProgress = 0f;
         }
-    }
-
-    private static GridPoint2 getNewCoordinates(GridPoint2 coordinates) {
-        if (Gdx.input.isKeyPressed(UP) || Gdx.input.isKeyPressed(W)) {
-            coordinates.y++;
-        } else if (Gdx.input.isKeyPressed(LEFT) || Gdx.input.isKeyPressed(A)) {
-            coordinates.x--;
-        } else if (Gdx.input.isKeyPressed(DOWN) || Gdx.input.isKeyPressed(S)) {
-            coordinates.y--;
-        } else if (Gdx.input.isKeyPressed(RIGHT) || Gdx.input.isKeyPressed(D)) {
-            coordinates.x++;
-        }
-        return coordinates;
-    }
-
-    private static float getNewRotation(float newRotation) {
-        if (Gdx.input.isKeyPressed(UP) || Gdx.input.isKeyPressed(W)) {
-            return 90f;
-        }
-        if (Gdx.input.isKeyPressed(LEFT) || Gdx.input.isKeyPressed(A)) {
-            return -180f;
-        }
-        if (Gdx.input.isKeyPressed(DOWN) || Gdx.input.isKeyPressed(S)) {
-            return -90f;
-        }
-        if (Gdx.input.isKeyPressed(RIGHT) || Gdx.input.isKeyPressed(D)) {
-            return 0f;
-        }
-        return newRotation;
     }
 
     private boolean isNotObstacle(List<StateObject> staticObstacles, GridPoint2 coordinates) {

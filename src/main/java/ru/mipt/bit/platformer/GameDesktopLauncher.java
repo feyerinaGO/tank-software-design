@@ -14,6 +14,7 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Interpolation;
 import ru.mipt.bit.platformer.graphic.Graphic;
+import ru.mipt.bit.platformer.levels.ContextLevel;
 import ru.mipt.bit.platformer.playobjects.DynamicObject;
 import ru.mipt.bit.platformer.playobjects.StateObject;
 import ru.mipt.bit.platformer.util.TileMovement;
@@ -22,12 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
+import static ru.mipt.bit.platformer.game_data.Constant.*;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 
 public class GameDesktopLauncher implements ApplicationListener {
-
-    private static final int COUNT_OBSTACLES = 1;
-
     private Batch batch;
 
     private TiledMap level;
@@ -35,29 +34,44 @@ public class GameDesktopLauncher implements ApplicationListener {
     private TileMovement tileMovement;
     private TiledMapTileLayer groundLayer;
 
-    // player tank
-    private DynamicObject player;
-    private static List<StateObject> staticObstacles = new ArrayList<>();
-    private static List<Graphic> graphicStaticObjects = new ArrayList<>();
-    private static List<Graphic> graphicDynamicObjects = new ArrayList<>();
+    private final ArrayList<DynamicObject> players = new ArrayList<>();
+    private final ArrayList<DynamicObject> enemies = new ArrayList<>();
+    private final ArrayList<StateObject> staticObstacles = new ArrayList<>();
+    private final ArrayList<Graphic> graphicStaticObjects = new ArrayList<>();
+    private final ArrayList<Graphic> graphicDynamicObjects = new ArrayList<>();
 
     @Override
     public void create() {
         initializeParams();
-        createDynamicObjects();
-        createStaticObstacles();
+        createGameObjects(USING_RANDOM);
         createGraphicObjects();
         moveInitialStaticObject();
+    }
+
+    private void createGameObjects(boolean random) {
+        if (random) {
+            ContextLevel.setContext(ContextLevel.RANDOM);
+        } else {
+            ContextLevel.setContext(ContextLevel.FROM_FILE);
+        }
+        createDynamicObjects();
+        createStaticObstacles();
     }
 
     @Override
     public void render() {
         clearScreen();
-        player.rotate(staticObstacles);
-        moveDynamicObjectsRectangle();
-        player.calculatePlayerCoordinates(Gdx.graphics.getDeltaTime());
+        moveDynamicObjects();
         levelRenderer.render();
         drawGraphics();
+    }
+
+    private void moveDynamicObjects() {
+        for (DynamicObject el: players) {
+            el.getNewPosition(staticObstacles, Gdx.input, true);
+            el.calculatePlayerCoordinates(Gdx.graphics.getDeltaTime());
+        }
+        moveDynamicObjectsRectangle();
     }
 
     private void initializeParams() {
@@ -76,13 +90,21 @@ public class GameDesktopLauncher implements ApplicationListener {
     }
 
     private void createStaticObstacles() {
-        for (int i = 0; i < COUNT_OBSTACLES; i++) {
-            staticObstacles.add(new StateObject(new GridPoint2(1, 3)));
+        var obstaclesCoordinates = ContextLevel.getObstaclesCoordinates();
+        for (GridPoint2 gp : obstaclesCoordinates) {
+            staticObstacles.add(new StateObject(gp, 0f));
         }
     }
 
     private void createDynamicObjects() {
-        player = new DynamicObject(new GridPoint2(1, 1), 0f);
+        var playersCoordinates = ContextLevel.getPlayersCoordinates();
+        for (GridPoint2 gp : playersCoordinates) {
+            players.add(new DynamicObject(gp, 0f));
+        }
+        var enemiesCoordinates = ContextLevel.getEnemiesCoordinates();
+        for (GridPoint2 gp : enemiesCoordinates) {
+            enemies.add(new DynamicObject(gp, 0f));
+        }
     }
 
     private void createGraphicStaticObjects() {
@@ -93,7 +115,12 @@ public class GameDesktopLauncher implements ApplicationListener {
     }
 
     private void createGraphicDynamicObjects() {
-        graphicDynamicObjects.add(new Graphic(new Texture("images/tank_blue.png"), player));
+        for (DynamicObject el: players) {
+            graphicDynamicObjects.add(new Graphic(new Texture("images/tank_blue.png"), el));
+        }
+        for (DynamicObject el: enemies) {
+            graphicDynamicObjects.add(new Graphic(new Texture("images/tank_blue.png"), el));
+        }
     }
 
     private void createGraphicObjects() {
@@ -163,7 +190,7 @@ public class GameDesktopLauncher implements ApplicationListener {
     public static void main(String[] args) {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         // level width: 10 tiles x 128px, height: 8 tiles x 128px
-        config.setWindowedMode(1280, 1024);
+        config.setWindowedMode(128*WIN_WDT_TILES, 128*WIN_HGT_TILES);
         new Lwjgl3Application(new GameDesktopLauncher(), config);
     }
 }
