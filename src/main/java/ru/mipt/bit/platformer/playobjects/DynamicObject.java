@@ -7,6 +7,7 @@ import ru.mipt.bit.platformer.moving.ContextMove;
 import java.util.List;
 
 import static com.badlogic.gdx.math.MathUtils.isEqual;
+import static ru.mipt.bit.platformer.game_data.Obstacles.obstaclesCoordinates;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.continueProgress;
 
 public class DynamicObject {
@@ -43,6 +44,12 @@ public class DynamicObject {
                 return false;
             }
         }
+        for (GridPoint2 obstacle : obstaclesCoordinates) {
+            if (obstacle.equals(coordinates)) {
+                return false;
+            }
+        }
+        obstaclesCoordinates.add(coordinates);
         return true;
     }
 

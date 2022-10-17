@@ -24,6 +24,7 @@ import java.util.List;
 
 import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
 import static ru.mipt.bit.platformer.game_data.Constant.*;
+import static ru.mipt.bit.platformer.game_data.Obstacles.obstaclesCoordinates;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 
 public class GameDesktopLauncher implements ApplicationListener {
@@ -67,11 +68,30 @@ public class GameDesktopLauncher implements ApplicationListener {
     }
 
     private void moveDynamicObjects() {
+        fillObstacles();
         for (DynamicObject el: players) {
             el.getNewPosition(staticObstacles, Gdx.input, true);
             el.calculatePlayerCoordinates(Gdx.graphics.getDeltaTime());
         }
+        for (DynamicObject el: enemies) {
+            el.getNewPosition(staticObstacles, Gdx.input, true);
+            el.calculatePlayerCoordinates(Gdx.graphics.getDeltaTime());
+        }
+        clearObstacles();
         moveDynamicObjectsRectangle();
+    }
+
+    private void clearObstacles() {
+        obstaclesCoordinates.clear();
+    }
+
+    private void fillObstacles() {
+        for (DynamicObject el: players) {
+            obstaclesCoordinates.add(el.state.initialCoordinates);
+        }
+        for (DynamicObject el: enemies) {
+            obstaclesCoordinates.add(el.state.initialCoordinates);
+        }
     }
 
     private void initializeParams() {
