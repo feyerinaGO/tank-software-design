@@ -15,19 +15,19 @@ public class AutoMove implements MoveObject {
         switch (direction) {
             case 1:
                 coordinates.y++;
-                if (coordinates.y > WIN_HGT_TILES) coordinates.y = WIN_HGT_TILES;
+                if (coordinates.y >= WIN_HGT_TILES) coordinates.y = WIN_HGT_TILES-1;
                 break;
             case 2:
                 coordinates.x--;
-                if (coordinates.x < 1) coordinates.x = 1;
+                if (coordinates.x < 0) coordinates.x = 0;
                 break;
             case 3:
                 coordinates.y--;
-                if (coordinates.y < 1) coordinates.y = 1;
+                if (coordinates.y < 0) coordinates.y = 0;
                 break;
             case 4:
                 coordinates.x++;
-                if (coordinates.x > WIN_WDT_TILES) coordinates.x = WIN_WDT_TILES;
+                if (coordinates.x >= WIN_WDT_TILES) coordinates.x = WIN_WDT_TILES-1;
                 break;
         }
         return coordinates;

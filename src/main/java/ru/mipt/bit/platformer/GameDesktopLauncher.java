@@ -74,7 +74,7 @@ public class GameDesktopLauncher implements ApplicationListener {
             el.calculatePlayerCoordinates(Gdx.graphics.getDeltaTime());
         }
         for (DynamicObject el: enemies) {
-            el.getNewPosition(staticObstacles, Gdx.input, true);
+            el.getNewPosition(staticObstacles, Gdx.input, false);
             el.calculatePlayerCoordinates(Gdx.graphics.getDeltaTime());
         }
         clearObstacles();
