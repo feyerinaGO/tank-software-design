@@ -13,123 +13,168 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Interpolation;
+import ru.mipt.bit.platformer.graphic.Graphic;
+import ru.mipt.bit.platformer.levels.ContextLevel;
+import ru.mipt.bit.platformer.playobjects.DynamicObject;
+import ru.mipt.bit.platformer.playobjects.StateObject;
 import ru.mipt.bit.platformer.util.TileMovement;
 
-import ru.mipt.bit.platformer.util.Coords;
-import ru.mipt.bit.platformer.util.PlayObject;
+import java.util.ArrayList;
+import java.util.List;
 
-import static com.badlogic.gdx.Input.Keys.*;
 import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
-import static com.badlogic.gdx.math.MathUtils.isEqual;
+import static ru.mipt.bit.platformer.game_data.Constant.*;
+import static ru.mipt.bit.platformer.game_data.Obstacles.obstaclesCoordinates;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 
 public class GameDesktopLauncher implements ApplicationListener {
-
-    private static final float MOVEMENT_SPEED = 0.4f;
-
     private Batch batch;
 
     private TiledMap level;
     private MapRenderer levelRenderer;
     private TileMovement tileMovement;
+    private TiledMapTileLayer groundLayer;
 
-    // player tank
-    private PlayObject player;
-
-    // tree
-    private PlayObject tree;
-
-
-    private void rotateTank(int var1, int var2, Coords cordChange, float rotation) {
-        if (Gdx.input.isKeyPressed(var1) || Gdx.input.isKeyPressed(var2)) {
-            if (isEqual(player.movementProgress, 1f)) {
-                switch (cordChange) {
-                    case XMORE:
-                        if (!tree.initialCoordinates.equals(incrementedX(player.coordinates))) {
-                            player.initialCoordinates.x++;
-                            player.movementProgress = 0f;
-                        }
-                        break;
-                    case XLESS:
-                        if (!tree.initialCoordinates.equals(decrementedX(player.coordinates))) {
-                            player.initialCoordinates.x--;
-                            player.movementProgress = 0f;
-                        }
-                        break;
-                    case YMORE:
-                        if (!tree.initialCoordinates.equals(incrementedY(player.coordinates))) {
-                            player.initialCoordinates.y++;
-                            player.movementProgress = 0f;
-                        }
-                        break;
-                    case YLESS:
-                        if (!tree.initialCoordinates.equals(decrementedY(player.coordinates))) {
-                            player.initialCoordinates.y--;
-                            player.movementProgress = 0f;
-                        }
-                        break;
-                }
-                player.rotation = rotation;
-            }
-        }
-    }
+    private final ArrayList<DynamicObject> players = new ArrayList<>();
+    private final ArrayList<DynamicObject> enemies = new ArrayList<>();
+    private final ArrayList<StateObject> staticObstacles = new ArrayList<>();
+    private final ArrayList<Graphic> graphicStaticObjects = new ArrayList<>();
+    private final ArrayList<Graphic> graphicDynamicObjects = new ArrayList<>();
 
     @Override
     public void create() {
-        batch = new SpriteBatch();
+        initializeParams();
+        createGameObjects(USING_RANDOM);
+        createGraphicObjects();
+        moveInitialStaticObject();
+    }
 
-        // load level tiles
-        level = new TmxMapLoader().load("level.tmx");
-        levelRenderer = createSingleLayerMapRenderer(level, batch);
-        TiledMapTileLayer groundLayer = getSingleLayer(level);
-        tileMovement = new TileMovement(groundLayer, Interpolation.smooth);
-
-        // player tank
-        player = new PlayObject(new Texture("images/tank_blue.png"), new GridPoint2(1, 1), 0f);
-
-        //tree
-        tree = new PlayObject(new Texture("images/greenTree.png"), new GridPoint2(1, 3));
-        moveRectangleAtTileCenter(groundLayer, tree.rectangle, tree.initialCoordinates);
+    private void createGameObjects(boolean random) {
+        if (random) {
+            ContextLevel.setContext(ContextLevel.RANDOM);
+        } else {
+            ContextLevel.setContext(ContextLevel.FROM_FILE);
+        }
+        createDynamicObjects();
+        createStaticObstacles();
     }
 
     @Override
     public void render() {
-        // clear the screen
-        Gdx.gl.glClearColor(0f, 0f, 0.2f, 1f);
-        Gdx.gl.glClear(GL_COLOR_BUFFER_BIT);
+        clearScreen();
+        moveDynamicObjects();
+        levelRenderer.render();
+        drawGraphics();
+    }
 
-        // get time passed since the last render
-        float deltaTime = Gdx.graphics.getDeltaTime();
+    private void moveDynamicObjects() {
+        fillObstacles();
+        for (DynamicObject el: players) {
+            el.getNewPosition(staticObstacles, Gdx.input, true);
+            el.calculatePlayerCoordinates(Gdx.graphics.getDeltaTime());
+        }
+        for (DynamicObject el: enemies) {
+            el.getNewPosition(staticObstacles, Gdx.input, false);
+            el.calculatePlayerCoordinates(Gdx.graphics.getDeltaTime());
+        }
+        clearObstacles();
+        moveDynamicObjectsRectangle();
+    }
 
-        rotateTank(UP, W, Coords.YMORE, 90f);
-        rotateTank(LEFT, A, Coords.XLESS, -180f);
-        rotateTank(DOWN, S, Coords.YLESS, -90f);
-        rotateTank(RIGHT, D, Coords.XMORE, 0f);
+    private void clearObstacles() {
+        obstaclesCoordinates.clear();
+    }
 
-        // calculate interpolated player screen coordinates
-        tileMovement.moveRectangleBetweenTileCenters(player.rectangle, player.coordinates,
-                player.initialCoordinates, player.movementProgress);
+    private void fillObstacles() {
+        for (DynamicObject el: players) {
+            obstaclesCoordinates.add(el.state.initialCoordinates);
+        }
+        for (DynamicObject el: enemies) {
+            obstaclesCoordinates.add(el.state.initialCoordinates);
+        }
+    }
 
-        player.movementProgress = continueProgress(player.movementProgress, deltaTime, MOVEMENT_SPEED);
-        if (isEqual(player.movementProgress, 1f)) {
-            // record that the player has reached his/her destination
-            player.coordinates.set(player.initialCoordinates);
+    private void initializeParams() {
+        batch = new SpriteBatch();
+        level = new TmxMapLoader().load("level.tmx");
+        levelRenderer = createSingleLayerMapRenderer(level, batch);
+        groundLayer = getSingleLayer(level);
+        tileMovement = new TileMovement(groundLayer, Interpolation.smooth);
+    }
+
+    private void moveInitialStaticObject() {
+        for (Graphic graphic : graphicStaticObjects) {
+            moveRectangleAtTileCenter(groundLayer, graphic.rectangle,
+                    graphic.state.initialCoordinates);
+        }
+    }
+
+    private void createStaticObstacles() {
+        var obstaclesCoordinates = ContextLevel.getObstaclesCoordinates();
+        for (GridPoint2 gp : obstaclesCoordinates) {
+            staticObstacles.add(new StateObject(gp, 0f));
+        }
+    }
+
+    private void createDynamicObjects() {
+        var playersCoordinates = ContextLevel.getPlayersCoordinates();
+        for (GridPoint2 gp : playersCoordinates) {
+            players.add(new DynamicObject(gp, 0f));
+        }
+        var enemiesCoordinates = ContextLevel.getEnemiesCoordinates();
+        for (GridPoint2 gp : enemiesCoordinates) {
+            enemies.add(new DynamicObject(gp, 0f));
+        }
+    }
+
+    private void createGraphicStaticObjects() {
+        for (StateObject obstacle : staticObstacles) {
+            graphicStaticObjects.add(new Graphic(new Texture("images/greenTree.png"),
+                    obstacle));
+        }
+    }
+
+    private void createGraphicDynamicObjects() {
+        for (DynamicObject el: players) {
+            graphicDynamicObjects.add(new Graphic(new Texture("images/tank_blue.png"), el));
+        }
+        for (DynamicObject el: enemies) {
+            graphicDynamicObjects.add(new Graphic(new Texture("images/tank_blue.png"), el));
+        }
+    }
+
+    private void createGraphicObjects() {
+        createGraphicStaticObjects();
+        createGraphicDynamicObjects();
+    }
+
+    private void moveDynamicObjectsRectangle() {
+        for (Graphic graphic : graphicDynamicObjects) {
+            graphic.moveDynamicObjectRectangle(tileMovement);
         }
 
-        // render each tile of the level
-        levelRenderer.render();
+    }
 
+    private void drawGraphics() {
         // start recording all drawing commands
         batch.begin();
 
-        // render player
-        drawTextureRegionUnscaled(batch, player.graphics, player.rectangle, player.rotation);
-
-        // render tree obstacle
-        drawTextureRegionUnscaled(batch, tree.graphics, tree.rectangle, 0f);
-
+        drawGraphicObjects(batch, graphicDynamicObjects);
+        drawGraphicObjects(batch, graphicStaticObjects);
         // submit all drawing requests
         batch.end();
+    }
+
+    private void drawGraphicObjects(Batch batch, List<Graphic> graphicList) {
+        for (Graphic graphic : graphicList) {
+            drawTextureRegionUnscaled(batch, graphic.graphics, graphic.rectangle,
+                    graphic.state.rotation);
+        }
+    }
+
+    private static void clearScreen() {
+        Gdx.gl.glClearColor(0f, 0f, 0.2f, 1f);
+        Gdx.gl.glClear(GL_COLOR_BUFFER_BIT);
     }
 
     @Override
@@ -150,16 +195,22 @@ public class GameDesktopLauncher implements ApplicationListener {
     @Override
     public void dispose() {
         // dispose of all the native resources (classes which implement com.badlogic.gdx.utils.Disposable)
-        tree.texture.dispose();
-        player.texture.dispose();
+        disposeObjects(graphicStaticObjects);
+        disposeObjects(graphicDynamicObjects);
         level.dispose();
         batch.dispose();
+    }
+
+    private void disposeObjects( List<Graphic> graphicList) {
+        for (Graphic graphic : graphicList) {
+            graphic.texture.dispose();
+        }
     }
 
     public static void main(String[] args) {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         // level width: 10 tiles x 128px, height: 8 tiles x 128px
-        config.setWindowedMode(1280, 1024);
+        config.setWindowedMode(128*WIN_WDT_TILES, 128*WIN_HGT_TILES);
         new Lwjgl3Application(new GameDesktopLauncher(), config);
     }
 }
