@@ -25,7 +25,7 @@ public class RandomLevel implements CreateLevel{
         level.dynamicObjects.addAll(getEnemies());
         return level;
     }
-    public ArrayList<StateObject> getObstacles() {
+    private ArrayList<StateObject> getObstacles() {
         ArrayList<StateObject> obstacles = new ArrayList<>();
         int count = ThreadLocalRandom.current().nextInt(1, (int) (0.15* WINDOW_WIDTH * WINDOW_HEIGHT) + 1);
         while (obstacles.size() < count) {
@@ -40,7 +40,7 @@ public class RandomLevel implements CreateLevel{
         return obstacles;
     }
 
-    public ArrayList<DynamicObject> getPlayers() {
+    private ArrayList<DynamicObject> getPlayers() {
         ArrayList<DynamicObject> players = new ArrayList<>();
         while (players.size() < COUNT_PLAYERS) {
             int x = ThreadLocalRandom.current().nextInt(1, WINDOW_WIDTH + 1);
@@ -54,7 +54,7 @@ public class RandomLevel implements CreateLevel{
         return players;
     }
 
-    public ArrayList<DynamicObject> getEnemies() {
+    private ArrayList<DynamicObject> getEnemies() {
         ArrayList<DynamicObject> enemies = new ArrayList<>();
         while (enemies.size() < COUNT_ENEMIES) {
             int x = ThreadLocalRandom.current().nextInt(1, WINDOW_WIDTH + 1);
