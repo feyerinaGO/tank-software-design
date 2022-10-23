@@ -1,27 +1,27 @@
 package ru.mipt.bit.platformer.levels;
-import com.badlogic.gdx.math.GridPoint2;
-import java.util.HashSet;
+import ru.mipt.bit.platformer.playobjects.Level;
+
+import java.util.HashMap;
 
 import static ru.mipt.bit.platformer.game_data.Constant.LEVEL_PATH;
 
 public class ContextLevel {
-    public static final CreateLevel RANDOM = new RandomLevel();
-    public static final CreateLevel FROM_FILE = new FromFileLevel(LEVEL_PATH);
+    public static HashMap<VariantLevel, CreateLevel> variants = new HashMap<>();
+    public static final CreateLevel RANDOM_LEVEL = new RandomLevel();
+    public static final CreateLevel FROM_FILE_LEVEL = new FromFileLevel(LEVEL_PATH);
     private static CreateLevel context;
 
-    public static void setContext(CreateLevel context) {
-        ContextLevel.context = context;
+    static {
+        variants.put(VariantLevel.RANDOM, RANDOM_LEVEL);
+        variants.put(VariantLevel.FROM_FILE, FROM_FILE_LEVEL);
     }
 
-    public static HashSet<GridPoint2> getObstaclesCoordinates() {
-        return context.getObstaclesCoordinates();
+    public static Level getLevel(VariantLevel variant) {
+        setContext(variant);
+        return context.getLevel();
     }
 
-    public static HashSet<GridPoint2> getPlayersCoordinates() {
-        return context.getPlayersCoordinates();
-    }
-
-    public static HashSet<GridPoint2> getEnemiesCoordinates() {
-        return context.getEnemiesCoordinates();
+    private static void setContext(VariantLevel variant) {
+        context = variants.get(variant);
     }
 }

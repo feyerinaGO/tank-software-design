@@ -1,72 +1,65 @@
 package ru.mipt.bit.platformer.playobjects;
 
-import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.GridPoint2;
-import ru.mipt.bit.platformer.moving.ContextMove;
-
-import java.util.List;
+import ru.mipt.bit.platformer.game_data.TypeGameObjects;
 
 import static com.badlogic.gdx.math.MathUtils.isEqual;
-import static ru.mipt.bit.platformer.game_data.Obstacles.obstaclesCoordinates;
-import static ru.mipt.bit.platformer.util.GdxGameUtils.continueProgress;
+import static ru.mipt.bit.platformer.game_data.Constant.WINDOW_HEIGHT;
+import static ru.mipt.bit.platformer.game_data.Constant.WINDOW_WIDTH;
 
 public class DynamicObject {
-    private static final float MOVEMENT_SPEED = 0.4f;
-    public StateObject state;
-    public GridPoint2 coordinates;
+    public Position position;
+    public MovingAbility movingAbility;
 
-    public float movementProgress = 1f;
-
-    public DynamicObject(GridPoint2 initialCoordinates, float rotation) {
-        this.state = new StateObject(initialCoordinates, rotation);
-        this.coordinates = new GridPoint2(this.state.initialCoordinates);
+    public DynamicObject(GridPoint2 initialCoordinates, float rotation, TypeGameObjects type) {
+        this.position = new Position(initialCoordinates, rotation, type);
+        this.movingAbility = new MovingAbility(new GridPoint2(this.position.coordinates));
     }
 
-    public void getNewPosition(List<StateObject> staticObstacles, Input input, boolean player) {
-        if (!isEqual(movementProgress, 1f)) { return; }
-        if (player) {
-            ContextMove.setContext(ContextMove.PLAYER);
-        } else {
-            ContextMove.setContext(ContextMove.ENEMY);
-        }
-        GridPoint2 coordinates = ContextMove.getNewCoordinates(input, new GridPoint2(state.initialCoordinates));
-        state.rotation = ContextMove.getNewRotation(input, state.rotation);
-
-        if (isNotObstacle(staticObstacles, coordinates)) {
-            state.initialCoordinates.set(coordinates);
-            movementProgress = 0f;
-        }
+    public DynamicObject(GridPoint2 initialCoordinates, TypeGameObjects type) {
+        this.position = new Position(initialCoordinates, type);
+        this.movingAbility = new MovingAbility(new GridPoint2(this.position.coordinates));
     }
 
-    private boolean isNotObstacle(List<StateObject> staticObstacles, GridPoint2 coordinates) {
-        for (StateObject obstacle : staticObstacles) {
-            if (obstacle.initialCoordinates.equals(coordinates)) {
+    private boolean isAbleMove(GridPoint2 coordinates, Level level) {
+        for (StateObject obstacle : level.staticObstacles) {
+            if (obstacle.position.coordinates.equals(coordinates)) {
                 return false;
             }
         }
-        for (GridPoint2 obstacle : obstaclesCoordinates) {
-            if (obstacle.equals(coordinates)) {
+        for (DynamicObject dynamicObject : level.dynamicObjects) {
+            if ((dynamicObject.position.coordinates.equals(coordinates)) ||
+                    (dynamicObject.movingAbility.nextCoordinates.equals(coordinates))) {
                 return false;
             }
         }
-        obstaclesCoordinates.add(coordinates);
         return true;
     }
 
-
-    public void calculatePlayerCoordinates(float deltaTime) {
-        getMovementProgress(deltaTime);
-        setNewCoordinates();
-    }
-
-    private void setNewCoordinates() {
-        if (isEqual(movementProgress, 1f)) {
-            // record that the player has reached his/her destination
-            coordinates.set(state.initialCoordinates);
+    public void move(Direction direction, Level level) {
+        if (!isEqual(movingAbility.movementProgress, 1f)) { return; }
+        GridPoint2 newCoordinates = Direction.add(direction, position.coordinates);
+        newCoordinates = checkBorders(newCoordinates);
+        position.rotation = direction.getAngle();
+        if (isAbleMove(newCoordinates, level)) {
+            movingAbility.nextCoordinates.set(newCoordinates);
+            movingAbility.movementProgress = 0f;
         }
     }
 
-    private void getMovementProgress(float deltaTime) {
-        movementProgress = continueProgress(movementProgress, deltaTime, MOVEMENT_SPEED);
+    public void takeChanges(float deltaTime) {
+        movingAbility.changeMovementProgress(deltaTime);
+        if (isEqual(movingAbility.movementProgress, 1f)) {
+            position.coordinates.set(movingAbility.nextCoordinates);
+        }
+    }
+
+    private GridPoint2 checkBorders(GridPoint2 coordinates) {
+        if (coordinates.y >= WINDOW_HEIGHT) coordinates.y = WINDOW_HEIGHT -1;
+        if (coordinates.y < 0) coordinates.y = 0;
+        if (coordinates.x >= WINDOW_WIDTH) coordinates.x = WINDOW_WIDTH -1;
+        if (coordinates.x < 0) coordinates.x = 0;
+        return coordinates;
     }
 }

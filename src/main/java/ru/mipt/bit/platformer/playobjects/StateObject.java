@@ -1,16 +1,15 @@
 package ru.mipt.bit.platformer.playobjects;
 
 import com.badlogic.gdx.math.GridPoint2;
+import ru.mipt.bit.platformer.game_data.TypeGameObjects;
 
 public class StateObject {
-    public GridPoint2 initialCoordinates;
-    public float rotation = 0f;
+    public Position position;
 
-    public StateObject(GridPoint2 initialCoordinates, float rotation) {
-        this(initialCoordinates);
-        this.rotation = rotation;
+    public StateObject(GridPoint2 initialCoordinates, float rotation, TypeGameObjects type) {
+        this.position = new Position(initialCoordinates, rotation, type);
     }
-    public StateObject(GridPoint2 initialCoordinates) {
-        this.initialCoordinates = new GridPoint2(initialCoordinates);
+    public StateObject(GridPoint2 initialCoordinates, TypeGameObjects type) {
+        this.position = new Position(initialCoordinates, type);
     }
 }
