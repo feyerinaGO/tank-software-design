@@ -3,7 +3,7 @@ import ru.mipt.bit.platformer.playobjects.Level;
 
 import java.util.HashMap;
 
-import static ru.mipt.bit.platformer.game_data.Constant.LEVEL_PATH;
+import static ru.mipt.bit.platformer.game_data.ConstantSettings.LEVEL_PATH;
 
 public class ContextLevel {
     public static HashMap<VariantLevel, CreateLevel> variants = new HashMap<>();

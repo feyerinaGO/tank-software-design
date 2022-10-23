@@ -1,6 +1,9 @@
 package ru.mipt.bit.platformer.playobjects;
 
 import com.badlogic.gdx.math.GridPoint2;
+import ru.mipt.bit.platformer.game_data.TypeGameObjects;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Direction {
     private final float angle;
@@ -15,6 +18,10 @@ public class Direction {
         this.angle = angle;
         this.vector = vector;
     }
+    public Direction() {
+        this.angle = 0f;
+        this.vector = new GridPoint2(0, 0);
+    }
 
     public float getAngle() {
         return angle;
@@ -28,6 +35,26 @@ public class Direction {
         GridPoint2 newCoordinates = new GridPoint2(coordinates);
         newCoordinates.add(direction.getVector());
         return newCoordinates;
+    }
+
+    public Direction getNextDirection(DynamicObject dynamicObject) {
+        Direction direction = null;
+        if (dynamicObject.position.getType().equals(TypeGameObjects.ENEMY)) {
+            direction = Direction.UP;
+            int randInt = ThreadLocalRandom.current().nextInt(1, 5);
+            switch (randInt) {
+                case 2:
+                    direction = Direction.LEFT;
+                    break;
+                case 3:
+                    direction = Direction.DOWN;
+                    break;
+                case 4:
+                    direction = Direction.RIGHT;
+                    break;
+            }
+        }
+        return direction;
     }
 
 

@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
-import static ru.mipt.bit.platformer.game_data.Constant.*;
+import static ru.mipt.bit.platformer.game_data.ConstantSettings.*;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 
 public class GameDesktopLauncher implements ApplicationListener {
@@ -42,12 +42,12 @@ public class GameDesktopLauncher implements ApplicationListener {
     private Level gameLevel = new Level();
     private GraphicInTime graphicInTime;
 
-    private ArrayList<CommandGenerator> commandGenerators = new ArrayList<>();
+    private final ArrayList<CommandGenerator> commandGenerators = new ArrayList<>();
 
     @Override
     public void create() {
         initializeParams();
-        createGameObjects(VariantLevel.FROM_FILE);
+        createGameObjects(VARIANT_LEVEL);
         createCommandGenerators();
         createGraphicObjects();
         moveInitialStaticObject();

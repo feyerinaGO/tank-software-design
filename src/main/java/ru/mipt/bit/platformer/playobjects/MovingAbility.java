@@ -2,7 +2,7 @@ package ru.mipt.bit.platformer.playobjects;
 
 import com.badlogic.gdx.math.GridPoint2;
 
-import static ru.mipt.bit.platformer.game_data.Constant.GLOBAL_MOVEMENT_SPEED;
+import static ru.mipt.bit.platformer.game_data.ConstantSettings.GLOBAL_MOVEMENT_SPEED;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.continueProgress;
 
 public class MovingAbility {

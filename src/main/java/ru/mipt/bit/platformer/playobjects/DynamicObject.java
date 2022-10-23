@@ -1,12 +1,11 @@
 package ru.mipt.bit.platformer.playobjects;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.GridPoint2;
 import ru.mipt.bit.platformer.game_data.TypeGameObjects;
 
 import static com.badlogic.gdx.math.MathUtils.isEqual;
-import static ru.mipt.bit.platformer.game_data.Constant.WINDOW_HEIGHT;
-import static ru.mipt.bit.platformer.game_data.Constant.WINDOW_WIDTH;
+import static ru.mipt.bit.platformer.game_data.ConstantSettings.WINDOW_HEIGHT;
+import static ru.mipt.bit.platformer.game_data.ConstantSettings.WINDOW_WIDTH;
 
 public class DynamicObject {
     public Position position;

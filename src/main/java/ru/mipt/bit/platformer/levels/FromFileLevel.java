@@ -10,7 +10,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static ru.mipt.bit.platformer.game_data.Constant.*;
+import static ru.mipt.bit.platformer.game_data.ConstantSettings.*;
 
 public class FromFileLevel implements CreateLevel {
     private final ArrayList<ArrayList<String>> scheme;

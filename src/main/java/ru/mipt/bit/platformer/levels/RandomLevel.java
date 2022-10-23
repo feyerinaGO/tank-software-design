@@ -8,7 +8,7 @@ import ru.mipt.bit.platformer.playobjects.DynamicObject;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.ThreadLocalRandom;
-import static ru.mipt.bit.platformer.game_data.Constant.*;
+import static ru.mipt.bit.platformer.game_data.ConstantSettings.*;
 
 public class RandomLevel implements CreateLevel{
     private final HashSet<GridPoint2> objects;

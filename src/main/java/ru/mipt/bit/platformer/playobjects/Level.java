@@ -1,5 +1,4 @@
 package ru.mipt.bit.platformer.playobjects;
-
 import java.util.ArrayList;
 
 public class Level {

@@ -7,7 +7,7 @@ import ru.mipt.bit.platformer.playobjects.DynamicObject;
 
 import java.util.ArrayList;
 
-import static ru.mipt.bit.platformer.game_data.Constant.TEXTURES;
+import static ru.mipt.bit.platformer.game_data.ConstantSettings.TEXTURES;
 
 public class GraphicInTime {
     public ArrayList<Graphic> graphicStaticObjects = new ArrayList<>();
