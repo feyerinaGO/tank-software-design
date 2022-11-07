@@ -54,7 +54,7 @@ public class FromFileLevel implements CreateLevel {
                     GlobalTypeOfObject typeOfObject = GLOBAL_TYPES_OF_OBJECTS.get(type);
                     if (typeOfObject.equals(GlobalTypeOfObject.STATIC)) {
                         level.staticObstacles.add(new StateObject(new GridPoint2(j, WINDOW_HEIGHT - i - 1), type));
-                    } else if (typeOfObject.equals(GlobalTypeOfObject.TANKS)) {
+                    } else if (typeOfObject.equals(GlobalTypeOfObject.DYNAMIC)) {
                         level.dynamicObjects.add(new DynamicObject(new GridPoint2(j, WINDOW_HEIGHT - i - 1), 0f, type));
                     }
                 }

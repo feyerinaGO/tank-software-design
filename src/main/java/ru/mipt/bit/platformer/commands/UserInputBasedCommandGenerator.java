@@ -33,6 +33,9 @@ public class UserInputBasedCommandGenerator implements CommandGenerator{
         } else if (Gdx.input.isKeyPressed(RIGHT) || Gdx.input.isKeyPressed(D)) {
             commandList.add(new MoveCommand(Direction.RIGHT, dynamicObject, level));
         }
+        if (Gdx.input.isKeyJustPressed(SPACE)) {
+            commandList.add(new ShootCommand(dynamicObject, level));
+        }
         return commandList;
     }
 }

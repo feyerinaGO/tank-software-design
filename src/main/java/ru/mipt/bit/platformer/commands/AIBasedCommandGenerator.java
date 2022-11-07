@@ -1,4 +1,4 @@
-package ru.mipt.bit.platformer.adapter;
+package ru.mipt.bit.platformer.commands;
 
 import org.awesome.ai.AI;
 import org.awesome.ai.Recommendation;
@@ -6,18 +6,24 @@ import org.awesome.ai.state.GameState;
 import org.awesome.ai.state.immovable.Obstacle;
 import org.awesome.ai.state.movable.Bot;
 import org.awesome.ai.state.movable.Player;
+import org.awesome.ai.strategy.NotRecommendingAI;
 import ru.mipt.bit.platformer.game_data.TypeGameObjects;
-import ru.mipt.bit.platformer.playobjects.*;
+import ru.mipt.bit.platformer.playobjects.Direction;
+import ru.mipt.bit.platformer.playobjects.DynamicObject;
+import ru.mipt.bit.platformer.playobjects.Level;
+import ru.mipt.bit.platformer.playobjects.StateObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
 import static org.awesome.ai.Action.*;
+import static org.awesome.ai.Action.MoveWest;
 import static ru.mipt.bit.platformer.game_data.ConstantSettings.WINDOW_HEIGHT;
 import static ru.mipt.bit.platformer.game_data.ConstantSettings.WINDOW_WIDTH;
 
-public class AdapterAIDirection extends Direction {
+public class AIBasedCommandGenerator implements CommandGenerator {
     private Level level;
     private GameState gameState;
     private AI algorithmAI;
@@ -33,13 +39,10 @@ public class AdapterAIDirection extends Direction {
         directionsActions.put(MoveWest, Direction.RIGHT);
     }
 
-    public AdapterAIDirection(Level level, AI algorithmAI) {
+    public AIBasedCommandGenerator(Level level) {
         this.level = level;
-        this.algorithmAI = algorithmAI;
-        gameState = convertLevelToGameState();
-        recommendations = algorithmAI.recommend(gameState);
-        getListDirections();
     }
+
 
     private GameState convertLevelToGameState() {
         ArrayList<Obstacle> obstacles = new ArrayList<>();
@@ -73,22 +76,21 @@ public class AdapterAIDirection extends Direction {
         return newState;
     }
 
-    private void getListDirections() {
+    @Override
+    public Collection<Command> generateCommands() {
+        this.algorithmAI = new NotRecommendingAI();
+        gameState = convertLevelToGameState();
+        recommendations = algorithmAI.recommend(gameState);
+        List<Command> commandList = new ArrayList<>();
         for (Recommendation rcmd : recommendations) {
             DynamicObject source = (DynamicObject)rcmd.getActor().getSource();
             var action = rcmd.getAction();
-            if (directionsActions.containsKey(action)) {
-                directionsForObjects.put(source, directionsActions.get(action));
+            if (source.position.getType().equals(TypeGameObjects.ENEMY) && directionsActions.containsKey(action)) {
+                commandList.add(new MoveCommand(directionsActions.get(action), source, level));
+            } else if (action.equals(Shoot)) {
+                commandList.add(new ShootCommand(source, level));
             }
         }
-    }
-
-    @Override
-    public Direction getNextDirection(DynamicObject dynamicObject) {
-        if (directionsForObjects.containsKey(dynamicObject)) {
-            return directionsForObjects.get(dynamicObject);
-        } else {
-            return super.getNextDirection(dynamicObject);
-        }
+        return commandList;
     }
 }

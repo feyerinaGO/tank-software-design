@@ -11,10 +11,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Interpolation;
-import ru.mipt.bit.platformer.commands.Command;
-import ru.mipt.bit.platformer.commands.CommandGenerator;
-import ru.mipt.bit.platformer.commands.RandomTankBotCommandGenerator;
-import ru.mipt.bit.platformer.commands.UserInputBasedCommandGenerator;
+import ru.mipt.bit.platformer.commands.*;
 import ru.mipt.bit.platformer.game_data.TypeGameObjects;
 import ru.mipt.bit.platformer.graphic.Graphic;
 import ru.mipt.bit.platformer.graphic.GraphicInTime;
@@ -57,6 +54,7 @@ public class GameDesktopLauncher implements ApplicationListener {
     public void render() {
         clearScreen();
         handleCommands();
+        gameLevel.update();
         live(); // live deltaTime
         levelRenderer.render();
         drawGraphics();
@@ -82,6 +80,8 @@ public class GameDesktopLauncher implements ApplicationListener {
             }
         }
         commandGenerators.add(new RandomTankBotCommandGenerator(gameLevel));
+//        commandGenerators.add(new AIBasedCommandGenerator(gameLevel));
+        commandGenerators.add(new InertiaMoveGenerator(gameLevel));
     }
 
     private void createGraphicObjects() {

@@ -27,6 +27,11 @@ public class MovingAbility {
         this.movementProgress = movementProgress;
     }
 
+    public MovingAbility(float movementSpeed, GridPoint2 nextCoordinates) {
+        this.movementSpeed = movementSpeed;
+        this.nextCoordinates = nextCoordinates;
+    }
+
     public void changeMovementProgress(float deltaTime) {
         movementProgress = continueProgress(movementProgress, deltaTime, movementSpeed);
     }

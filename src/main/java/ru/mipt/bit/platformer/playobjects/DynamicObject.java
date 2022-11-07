@@ -21,7 +21,12 @@ public class DynamicObject {
         this.movingAbility = new MovingAbility(new GridPoint2(this.position.coordinates));
     }
 
-    private boolean isAbleMove(GridPoint2 coordinates, Level level) {
+    public DynamicObject(GridPoint2 initialCoordinates, float rotation, float movementSpeed, TypeGameObjects type) {
+        this.position = new Position(initialCoordinates, rotation, type);
+        this.movingAbility = new MovingAbility(movementSpeed, new GridPoint2(this.position.coordinates));
+    }
+
+    public static boolean isAbleMove(GridPoint2 coordinates, Level level) {
         for (StateObject obstacle : level.staticObstacles) {
             if (obstacle.position.coordinates.equals(coordinates)) {
                 return false;
@@ -39,10 +44,10 @@ public class DynamicObject {
     public void move(Direction direction, Level level) {
         if (!isEqual(movingAbility.movementProgress, 1f)) { return; }
         GridPoint2 newCoordinates = Direction.add(direction, position.coordinates);
-        newCoordinates = checkBorders(newCoordinates);
+        GridPoint2 newCorrectedCoordinates = correctWithBorders(newCoordinates);
         position.rotation = direction.getAngle();
-        if (isAbleMove(newCoordinates, level)) {
-            movingAbility.nextCoordinates.set(newCoordinates);
+        if (isAbleMove(newCorrectedCoordinates, level)) {
+            movingAbility.nextCoordinates.set(newCorrectedCoordinates);
             movingAbility.movementProgress = 0f;
         }
     }
@@ -51,14 +56,19 @@ public class DynamicObject {
         movingAbility.changeMovementProgress(deltaTime);
         if (isEqual(movingAbility.movementProgress, 1f)) {
             position.coordinates.set(movingAbility.nextCoordinates);
+            if (position.isNeedDecrease()) {
+                position.decreaseHealthLevel();
+            }
         }
+        position.setNeedDecrease(false);
     }
 
-    private GridPoint2 checkBorders(GridPoint2 coordinates) {
-        if (coordinates.y >= WINDOW_HEIGHT) coordinates.y = WINDOW_HEIGHT -1;
-        if (coordinates.y < 0) coordinates.y = 0;
-        if (coordinates.x >= WINDOW_WIDTH) coordinates.x = WINDOW_WIDTH -1;
-        if (coordinates.x < 0) coordinates.x = 0;
-        return coordinates;
+    protected GridPoint2 correctWithBorders(GridPoint2 coordinates) {
+        GridPoint2 newCoordinates = new GridPoint2(coordinates);
+        if (newCoordinates.y >= WINDOW_HEIGHT) newCoordinates.y = WINDOW_HEIGHT -1;
+        if (newCoordinates.y < 0) newCoordinates.y = 0;
+        if (newCoordinates.x >= WINDOW_WIDTH) newCoordinates.x = WINDOW_WIDTH -1;
+        if (newCoordinates.x < 0) newCoordinates.x = 0;
+        return newCoordinates;
     }
 }
