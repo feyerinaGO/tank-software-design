@@ -1,9 +1,6 @@
 package ru.mipt.bit.platformer.commands;
 
-import com.badlogic.gdx.math.GridPoint2;
-import ru.mipt.bit.platformer.playobjects.Direction;
 import ru.mipt.bit.platformer.playobjects.DynamicObject;
-import ru.mipt.bit.platformer.playobjects.DynamicObjectBullet;
 import ru.mipt.bit.platformer.playobjects.Level;
 
 public class ShootCommand implements Command{
@@ -17,11 +14,6 @@ public class ShootCommand implements Command{
 
     @Override
     public void execute() {
-        GridPoint2 coordinates = Direction.add(Direction.getDirectionByRotation(dynamicObject.position.rotation),
-                dynamicObject.position.coordinates);
-        if (DynamicObject.isAbleMove(coordinates, level)) {
-            level.addDynamicObject(new DynamicObjectBullet(coordinates,
-                    dynamicObject.position.rotation));
-        }
+        dynamicObject.shoot(level);
     }
 }

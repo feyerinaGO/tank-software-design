@@ -11,6 +11,12 @@ public class Position {
 
     private int healthLevel;
 
+    public int getMaxHealthLevel() {
+        return maxHealthLevel;
+    }
+
+    private final int maxHealthLevel;
+
     private boolean needDecrease = false;
 
     private final TypeGameObjects type;
@@ -22,7 +28,8 @@ public class Position {
     public Position(GridPoint2 coordinates, TypeGameObjects type) {
         this.coordinates = new GridPoint2(coordinates);
         this.type = type;
-        this.healthLevel = HEALTHY_START.get(this.type);
+        this.maxHealthLevel = HEALTHY_START.get(this.type);
+        this.healthLevel = this.maxHealthLevel;
     }
 
     public TypeGameObjects getType() {

@@ -3,22 +3,22 @@ package ru.mipt.bit.platformer.playobjects;
 import com.badlogic.gdx.math.GridPoint2;
 
 import static ru.mipt.bit.platformer.game_data.ConstantSettings.GLOBAL_MOVEMENT_SPEED;
-import static ru.mipt.bit.platformer.util.GdxGameUtils.continueProgress;
 
 public class MovingAbility {
 
-    private float movementSpeed;
+    private final float initialMovementSpeed;
     public GridPoint2 nextCoordinates;
-    public float movementProgress = 1f;
 
-    public MovingAbility(float movementSpeed, GridPoint2 nextCoordinates, float movementProgress) {
-        this.movementSpeed = movementSpeed;
+    private float movementProgress = 1f;
+
+    public MovingAbility(float initialMovementSpeed, GridPoint2 nextCoordinates, float movementProgress) {
+        this.initialMovementSpeed = initialMovementSpeed;
         this.nextCoordinates = nextCoordinates;
         this.movementProgress = movementProgress;
     }
 
     public MovingAbility(GridPoint2 nextCoordinates) {
-        this.movementSpeed = GLOBAL_MOVEMENT_SPEED;
+        this.initialMovementSpeed = GLOBAL_MOVEMENT_SPEED;
         this.nextCoordinates = new GridPoint2(nextCoordinates);
     }
 
@@ -27,12 +27,20 @@ public class MovingAbility {
         this.movementProgress = movementProgress;
     }
 
-    public MovingAbility(float movementSpeed, GridPoint2 nextCoordinates) {
-        this.movementSpeed = movementSpeed;
+    public MovingAbility(float initialMovementSpeed, GridPoint2 nextCoordinates) {
+        this.initialMovementSpeed = initialMovementSpeed;
         this.nextCoordinates = nextCoordinates;
     }
 
-    public void changeMovementProgress(float deltaTime) {
-        movementProgress = continueProgress(movementProgress, deltaTime, movementSpeed);
+    public float getInitialMovementSpeed() {
+        return initialMovementSpeed;
+    }
+
+    public float getMovementProgress() {
+        return movementProgress;
+    }
+
+    public void setMovementProgress(float movementProgress) {
+        this.movementProgress = movementProgress;
     }
 }

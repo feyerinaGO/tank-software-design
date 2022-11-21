@@ -17,7 +17,7 @@ public class DynamicObjectBullet extends DynamicObject{
 
     @Override
     public void move(Direction direction, Level level) {
-        if (!isEqual(this.movingAbility.movementProgress, 1f)) { return; }
+        if (!isEqual(this.movingAbility.getMovementProgress(), 1f)) { return; }
         GridPoint2 newCoordinates = Direction.add(direction, this.position.coordinates);
         GridPoint2 newCorrectedCoordinates = correctWithBorders(newCoordinates);
         if ((newCorrectedCoordinates.x==newCoordinates.x) && (newCorrectedCoordinates.y==newCoordinates.y)){
@@ -26,7 +26,7 @@ public class DynamicObjectBullet extends DynamicObject{
         this.position.rotation = direction.getAngle();
         if (isNotCrash(newCoordinates, level)) {
             this.movingAbility.nextCoordinates.set(newCoordinates);
-            this.movingAbility.movementProgress = 0f;
+            this.movingAbility.setMovementProgress(0f);
         }
     }
 

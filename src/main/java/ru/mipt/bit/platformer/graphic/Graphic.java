@@ -29,7 +29,7 @@ public class Graphic {
 
     public void moveDynamicObjectRectangle(TileMovement tileMovement) {
         tileMovement.moveRectangleBetweenTileCenters(rectangle, position.coordinates,
-                movingAbility.nextCoordinates, movingAbility.movementProgress);
+                movingAbility.nextCoordinates, movingAbility.getMovementProgress());
 
     }
 }
