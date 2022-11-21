@@ -13,6 +13,7 @@ public class HealthBar extends ProgressBar {
     /**
      * @param width of the health bar
      * @param height of the health bar
+     * @param color of the color bar
      */
     public HealthBar(int width, int height, Color color) {
         super(0f, 1f, 0.01f, false, new ProgressBarStyle());
