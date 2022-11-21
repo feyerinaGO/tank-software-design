@@ -4,132 +4,164 @@ import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.MapRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.Rectangle;
+import ru.mipt.bit.platformer.commands.*;
+import ru.mipt.bit.platformer.game_data.TypeGameObjects;
+import ru.mipt.bit.platformer.graphic.Graphic;
+import ru.mipt.bit.platformer.graphic.GraphicInTime;
+import ru.mipt.bit.platformer.levels.ContextLevel;
+import ru.mipt.bit.platformer.levels.VariantLevel;
+import ru.mipt.bit.platformer.playobjects.DynamicObject;
+import ru.mipt.bit.platformer.playobjects.Level;
 import ru.mipt.bit.platformer.util.TileMovement;
 
-import ru.mipt.bit.platformer.util.Coords;
-import ru.mipt.bit.platformer.util.PlayObject;
+import java.util.ArrayList;
+import java.util.List;
 
-import static com.badlogic.gdx.Input.Keys.*;
 import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
-import static com.badlogic.gdx.math.MathUtils.isEqual;
+import static ru.mipt.bit.platformer.game_data.ConstantSettings.*;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 
 public class GameDesktopLauncher implements ApplicationListener {
-
-    private static final float MOVEMENT_SPEED = 0.4f;
-
     private Batch batch;
 
     private TiledMap level;
     private MapRenderer levelRenderer;
     private TileMovement tileMovement;
+    private TiledMapTileLayer groundLayer;
 
-    // player tank
-    private PlayObject player;
+    private Level gameLevel = new Level();
+    private GraphicInTime graphicInTime;
 
-    // tree
-    private PlayObject tree;
-
-
-    private void rotateTank(int var1, int var2, Coords cordChange, float rotation) {
-        if (Gdx.input.isKeyPressed(var1) || Gdx.input.isKeyPressed(var2)) {
-            if (isEqual(player.movementProgress, 1f)) {
-                switch (cordChange) {
-                    case XMORE:
-                        if (!tree.initialCoordinates.equals(incrementedX(player.coordinates))) {
-                            player.initialCoordinates.x++;
-                            player.movementProgress = 0f;
-                        }
-                        break;
-                    case XLESS:
-                        if (!tree.initialCoordinates.equals(decrementedX(player.coordinates))) {
-                            player.initialCoordinates.x--;
-                            player.movementProgress = 0f;
-                        }
-                        break;
-                    case YMORE:
-                        if (!tree.initialCoordinates.equals(incrementedY(player.coordinates))) {
-                            player.initialCoordinates.y++;
-                            player.movementProgress = 0f;
-                        }
-                        break;
-                    case YLESS:
-                        if (!tree.initialCoordinates.equals(decrementedY(player.coordinates))) {
-                            player.initialCoordinates.y--;
-                            player.movementProgress = 0f;
-                        }
-                        break;
-                }
-                player.rotation = rotation;
-            }
-        }
-    }
+    private final ArrayList<CommandGenerator> commandGenerators = new ArrayList<>();
 
     @Override
     public void create() {
-        batch = new SpriteBatch();
-
-        // load level tiles
-        level = new TmxMapLoader().load("level.tmx");
-        levelRenderer = createSingleLayerMapRenderer(level, batch);
-        TiledMapTileLayer groundLayer = getSingleLayer(level);
-        tileMovement = new TileMovement(groundLayer, Interpolation.smooth);
-
-        // player tank
-        player = new PlayObject(new Texture("images/tank_blue.png"), new GridPoint2(1, 1), 0f);
-
-        //tree
-        tree = new PlayObject(new Texture("images/greenTree.png"), new GridPoint2(1, 3));
-        moveRectangleAtTileCenter(groundLayer, tree.rectangle, tree.initialCoordinates);
+        initializeParams();
+        createGameObjects(VARIANT_LEVEL);
+        createCommandGenerators();
+        createGraphicObjects();
+        moveInitialStaticObject();
     }
 
     @Override
     public void render() {
-        // clear the screen
+        clearScreen();
+        handleCommands();
+        gameLevel.update();
+        live(); // live deltaTime
+        levelRenderer.render();
+        drawGraphics();
+    }
+
+    private void initializeParams() {
+        batch = new SpriteBatch();
+        level = new TmxMapLoader().load("level.tmx");
+        levelRenderer = createSingleLayerMapRenderer(level, batch);
+        groundLayer = getSingleLayer(level);
+        tileMovement = new TileMovement(groundLayer, Interpolation.smooth);
+    }
+
+    private void createGameObjects(VariantLevel variant) {
+        gameLevel = ContextLevel.getLevel(variant);
+    }
+
+    private void createCommandGenerators() {
+        for (DynamicObject dynamicObject : gameLevel.getDynamicObjects()) {
+            if (dynamicObject.position.getType().equals(TypeGameObjects.PLAYER)) {
+                commandGenerators.add(new UserInputBasedCommandGenerator(dynamicObject, gameLevel));
+                break;
+            }
+        }
+        commandGenerators.add(new RandomTankBotCommandGenerator(gameLevel));
+//        commandGenerators.add(new AIBasedCommandGenerator(gameLevel));
+        commandGenerators.add(new InertiaMoveGenerator(gameLevel));
+    }
+
+    private void createGraphicObjects() {
+        graphicInTime = new GraphicInTime(gameLevel);
+    }
+
+    private void moveInitialStaticObject() {
+        for (Graphic graphic : graphicInTime.graphicStaticObjects) {
+            moveRectangleAtTileCenter(groundLayer, graphic.rectangle,
+                    graphic.position.coordinates);
+
+        }
+    }
+
+    private static void clearScreen() {
         Gdx.gl.glClearColor(0f, 0f, 0.2f, 1f);
         Gdx.gl.glClear(GL_COLOR_BUFFER_BIT);
+    }
 
-        // get time passed since the last render
-        float deltaTime = Gdx.graphics.getDeltaTime();
+    private void handleCommands() {
+        for (CommandGenerator cmdGen : commandGenerators) {
+            for (Command cmd : cmdGen.generateCommands()) {
+                cmd.execute();
+            }
+        }
+    }
 
-        rotateTank(UP, W, Coords.YMORE, 90f);
-        rotateTank(LEFT, A, Coords.XLESS, -180f);
-        rotateTank(DOWN, S, Coords.YLESS, -90f);
-        rotateTank(RIGHT, D, Coords.XMORE, 0f);
+    private void live() {
+        for (DynamicObject dynamicObject : gameLevel.getDynamicObjects()) {
+            dynamicObject.takeChanges(Gdx.graphics.getDeltaTime());
+        }
+        moveDynamicObjectsRectangle();
+    }
 
-        // calculate interpolated player screen coordinates
-        tileMovement.moveRectangleBetweenTileCenters(player.rectangle, player.coordinates,
-                player.initialCoordinates, player.movementProgress);
-
-        player.movementProgress = continueProgress(player.movementProgress, deltaTime, MOVEMENT_SPEED);
-        if (isEqual(player.movementProgress, 1f)) {
-            // record that the player has reached his/her destination
-            player.coordinates.set(player.initialCoordinates);
+    private void moveDynamicObjectsRectangle() {
+        for (Graphic graphic : graphicInTime.graphicDynamicObjects) {
+            graphic.moveDynamicObjectRectangle(tileMovement);
         }
 
-        // render each tile of the level
-        levelRenderer.render();
+    }
 
+    private void drawGraphics() {
         // start recording all drawing commands
         batch.begin();
 
-        // render player
-        drawTextureRegionUnscaled(batch, player.graphics, player.rectangle, player.rotation);
-
-        // render tree obstacle
-        drawTextureRegionUnscaled(batch, tree.graphics, tree.rectangle, 0f);
-
+        drawGraphicObjects(batch, graphicInTime.graphicDynamicObjects);
+        drawProgressBarForObjects(batch, graphicInTime.graphicDynamicObjects);
+        drawGraphicObjects(batch, graphicInTime.graphicStaticObjects);
         // submit all drawing requests
         batch.end();
+    }
+
+    private void drawGraphicObjects(Batch batch, List<Graphic> graphicList) {
+        for (Graphic graphic : graphicList) {
+            drawTextureRegionUnscaled(batch, graphic.graphics, graphic.rectangle,
+                    graphic.position.rotation);
+        }
+    }
+
+    private void drawProgressBarForObjects(Batch batch, List<Graphic> graphicList) {
+        if (gameLevel.isShowProgressBar()) {
+            for (Graphic graphic : graphicList) {
+                if ((graphic.position.getType().equals(TypeGameObjects.PLAYER)) ||
+                        (graphic.position.getType().equals(TypeGameObjects.ENEMY))) {
+                    graphic.setProgressBar();
+                    graphic.healthy.draw(batch, 1f);
+                    graphic.healthMax.draw(batch, 1f);
+                }
+            }
+        }
+    }
+
+    public static void drawTextureRegionUnscaled(Batch batch, TextureRegion region, Rectangle rectangle, float rotation) {
+        int regionWidth = region.getRegionWidth();
+        int regionHeight = region.getRegionHeight();
+        float regionOriginX = regionWidth / 2f;
+        float regionOriginY = regionHeight / 2f;
+        batch.draw(region, rectangle.x, rectangle.y, regionOriginX, regionOriginY, regionWidth, regionHeight, 1f, 1f, rotation);
     }
 
     @Override
@@ -150,16 +182,22 @@ public class GameDesktopLauncher implements ApplicationListener {
     @Override
     public void dispose() {
         // dispose of all the native resources (classes which implement com.badlogic.gdx.utils.Disposable)
-        tree.texture.dispose();
-        player.texture.dispose();
+        disposeObjects(graphicInTime.graphicStaticObjects);
+        disposeObjects(graphicInTime.graphicDynamicObjects);
         level.dispose();
         batch.dispose();
+    }
+
+    private void disposeObjects( List<Graphic> graphicList) {
+        for (Graphic graphic : graphicList) {
+            graphic.texture.dispose();
+        }
     }
 
     public static void main(String[] args) {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         // level width: 10 tiles x 128px, height: 8 tiles x 128px
-        config.setWindowedMode(1280, 1024);
+        config.setWindowedMode(128* WINDOW_WIDTH, 128* WINDOW_HEIGHT);
         new Lwjgl3Application(new GameDesktopLauncher(), config);
     }
 }
