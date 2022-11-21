@@ -11,7 +11,7 @@ import ru.mipt.bit.platformer.game_data.TypeGameObjects;
 import ru.mipt.bit.platformer.playobjects.Direction;
 import ru.mipt.bit.platformer.playobjects.DynamicObject;
 import ru.mipt.bit.platformer.playobjects.Level;
-import ru.mipt.bit.platformer.playobjects.StateObject;
+import ru.mipt.bit.platformer.playobjects.StaticObject;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,12 +24,8 @@ import static ru.mipt.bit.platformer.game_data.ConstantSettings.WINDOW_HEIGHT;
 import static ru.mipt.bit.platformer.game_data.ConstantSettings.WINDOW_WIDTH;
 
 public class AIBasedCommandGenerator implements CommandGenerator {
-    private Level level;
-    private GameState gameState;
-    private AI algorithmAI;
-    private List<Recommendation> recommendations;
+    private final Level level;
     private static HashMap<Enum, Direction> directionsActions = new HashMap<>();
-    private HashMap<DynamicObject, Direction> directionsForObjects = new HashMap<>();
 
 
     static {
@@ -49,10 +45,10 @@ public class AIBasedCommandGenerator implements CommandGenerator {
         ArrayList<Bot> bots = new ArrayList<>();
         Player player;
         var playerBuilder = Player.builder();
-        for (StateObject stateObject : level.staticObstacles) {
-            obstacles.add(new Obstacle(stateObject.position.coordinates.x, stateObject.position.coordinates.y));
+        for (StaticObject staticObject : level.getStaticObstacles()) {
+            obstacles.add(new Obstacle(staticObject.position.coordinates.x, staticObject.position.coordinates.y));
         }
-        for (DynamicObject tank : level.dynamicObjects) {
+        for (DynamicObject tank : level.getDynamicObjects()) {
             if (tank.position.getType().equals(TypeGameObjects.ENEMY)) {
                 var botBuilder = Bot.builder();
                 botBuilder = botBuilder.source(tank);
@@ -72,15 +68,14 @@ public class AIBasedCommandGenerator implements CommandGenerator {
         gameStateBuilder = gameStateBuilder.player(player);
         gameStateBuilder = gameStateBuilder.levelHeight(WINDOW_HEIGHT);
         gameStateBuilder = gameStateBuilder.levelWidth(WINDOW_WIDTH);
-        GameState newState = gameStateBuilder.build();
-        return newState;
+        return gameStateBuilder.build();
     }
 
     @Override
     public Collection<Command> generateCommands() {
-        this.algorithmAI = new NotRecommendingAI();
-        gameState = convertLevelToGameState();
-        recommendations = algorithmAI.recommend(gameState);
+        AI algorithmAI = new NotRecommendingAI();
+        GameState gameState = convertLevelToGameState();
+        List<Recommendation> recommendations = algorithmAI.recommend(gameState);
         List<Command> commandList = new ArrayList<>();
         for (Recommendation rcmd : recommendations) {
             DynamicObject source = (DynamicObject)rcmd.getActor().getSource();

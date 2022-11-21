@@ -7,8 +7,8 @@ import ru.mipt.bit.platformer.playobjects.DynamicObjectBullet;
 import ru.mipt.bit.platformer.playobjects.Level;
 
 public class ShootCommand implements Command{
-    private DynamicObject dynamicObject;
-    private Level level;
+    private final DynamicObject dynamicObject;
+    private final Level level;
 
     public ShootCommand(DynamicObject dynamicObject, Level level) {
         this.dynamicObject = dynamicObject;
@@ -20,9 +20,8 @@ public class ShootCommand implements Command{
         GridPoint2 coordinates = Direction.add(Direction.getDirectionByRotation(dynamicObject.position.rotation),
                 dynamicObject.position.coordinates);
         if (DynamicObject.isAbleMove(coordinates, level)) {
-            level.dynamicObjects.add(new DynamicObjectBullet(coordinates,
+            level.addDynamicObject(new DynamicObjectBullet(coordinates,
                     dynamicObject.position.rotation));
-            level.notifyChanges();
         }
     }
 }

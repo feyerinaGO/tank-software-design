@@ -31,13 +31,13 @@ public class DynamicObjectBullet extends DynamicObject{
     }
 
     private boolean isNotCrash(GridPoint2 coordinates, Level level) {
-        for (StateObject obstacle : level.staticObstacles) {
+        for (StaticObject obstacle : level.getStaticObstacles()) {
             if (obstacle.position.coordinates.equals(coordinates)) {
                 this.position.decreaseHealthLevel();
                 return false;
             }
         }
-        for (DynamicObject dynamicObject : level.dynamicObjects) {
+        for (DynamicObject dynamicObject : level.getDynamicObjects()) {
             if ((dynamicObject.position.coordinates.equals(coordinates)) ||
                     (dynamicObject.movingAbility.nextCoordinates.equals(coordinates))) {
                 dynamicObject.position.decreaseHealthLevel();

@@ -10,7 +10,7 @@ class FromFileLevelTest {
     @Test
     void getLevelTest() {
         Level level = new FromFileLevel(LEVEL_PATH).getLevel();
-        assertEquals(level.staticObstacles.size(), 15, "Wrong number of obstacles!");
-        assertEquals(level.dynamicObjects.size(), 4, "Wrong number of tanks!");
+        assertEquals(level.getStaticObstacles().size(), 15, "Wrong number of obstacles!");
+        assertEquals(level.getDynamicObjects().size(), 4, "Wrong number of tanks!");
     }
 }

@@ -27,12 +27,12 @@ public class DynamicObject {
     }
 
     public static boolean isAbleMove(GridPoint2 coordinates, Level level) {
-        for (StateObject obstacle : level.staticObstacles) {
+        for (StaticObject obstacle : level.getStaticObstacles()) {
             if (obstacle.position.coordinates.equals(coordinates)) {
                 return false;
             }
         }
-        for (DynamicObject dynamicObject : level.dynamicObjects) {
+        for (DynamicObject dynamicObject : level.getDynamicObjects()) {
             if ((dynamicObject.position.coordinates.equals(coordinates)) ||
                     (dynamicObject.movingAbility.nextCoordinates.equals(coordinates))) {
                 return false;

@@ -1,28 +1,47 @@
 package ru.mipt.bit.platformer.playobjects;
 import ru.mipt.bit.platformer.events.EventListener;
 import ru.mipt.bit.platformer.events.EventManager;
+import ru.mipt.bit.platformer.events.EventType;
 
 import java.util.ArrayList;
 
 public class Level implements EventManager {
-    public ArrayList<StateObject> staticObstacles = new ArrayList<>();
-    public ArrayList<DynamicObject> dynamicObjects = new ArrayList<>();
-    private ArrayList<EventListener> listeners = new ArrayList<>();
+    private final ArrayList<StaticObject> staticObstacles = new ArrayList<>();
+    private final ArrayList<DynamicObject> dynamicObjects = new ArrayList<>();
+    private final ArrayList<EventListener> listeners = new ArrayList<>();
+
+    public void addDynamicObject(DynamicObject dynamicObject){
+        dynamicObjects.add(dynamicObject);
+        notifyChanges(EventType.ADD_DYNAMIC, dynamicObject);
+    }
+
+    public void addStaticObstacles(StaticObject staticObject){
+        staticObstacles.add(staticObject);
+        notifyChanges(EventType.ADD_STATIC, staticObject);
+    }
+
+    public ArrayList<StaticObject> getStaticObstacles() {
+        return staticObstacles;
+    }
+
+    public ArrayList<DynamicObject> getDynamicObjects() {
+        return dynamicObjects;
+    }
+
+    public void removeDynamicObject(DynamicObject dynamicObject){
+        dynamicObjects.remove(dynamicObject);
+        notifyChanges(EventType.REMOVE_DYNAMIC, dynamicObject);
+    }
 
     public void update() {
-        boolean isChanges = false;
-        ArrayList<DynamicObject> forRemoving = new ArrayList<>();
+        ArrayList<DynamicObject> forRemove = new ArrayList<>();
         for (DynamicObject dynamicObject : dynamicObjects) {
             if (dynamicObject.position.getHealthLevel() < 1) {
-                forRemoving.add(dynamicObject);
+                forRemove.add(dynamicObject);
             }
         }
-        for (DynamicObject dynamicObject : forRemoving) {
-            dynamicObjects.remove(dynamicObject);
-            isChanges = true;
-        }
-        if (isChanges) {
-            notifyChanges();
+        for (DynamicObject dynamicObject : forRemove) {
+            removeDynamicObject(dynamicObject);
         }
     }
 
@@ -31,10 +50,11 @@ public class Level implements EventManager {
         listeners.add(listener);
     }
 
+
     @Override
-    public void notifyChanges() {
+    public void notifyChanges(EventType eventType, Object o) {
         for (EventListener listener : listeners) {
-            listener.update(this);
+            listener.update(eventType, o);
         }
     }
 }

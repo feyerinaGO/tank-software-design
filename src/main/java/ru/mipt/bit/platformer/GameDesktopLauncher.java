@@ -73,7 +73,7 @@ public class GameDesktopLauncher implements ApplicationListener {
     }
 
     private void createCommandGenerators() {
-        for (DynamicObject dynamicObject : gameLevel.dynamicObjects) {
+        for (DynamicObject dynamicObject : gameLevel.getDynamicObjects()) {
             if (dynamicObject.position.getType().equals(TypeGameObjects.PLAYER)) {
                 commandGenerators.add(new UserInputBasedCommandGenerator(dynamicObject, gameLevel));
                 break;
@@ -110,7 +110,7 @@ public class GameDesktopLauncher implements ApplicationListener {
     }
 
     private void live() {
-        for (DynamicObject dynamicObject : gameLevel.dynamicObjects) {
+        for (DynamicObject dynamicObject : gameLevel.getDynamicObjects()) {
             dynamicObject.takeChanges(Gdx.graphics.getDeltaTime());
         }
         moveDynamicObjectsRectangle();

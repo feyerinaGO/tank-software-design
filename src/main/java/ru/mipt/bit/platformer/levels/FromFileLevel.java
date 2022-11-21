@@ -3,7 +3,7 @@ import com.badlogic.gdx.math.GridPoint2;
 import ru.mipt.bit.platformer.game_data.GlobalTypeOfObject;
 import ru.mipt.bit.platformer.game_data.TypeGameObjects;
 import ru.mipt.bit.platformer.playobjects.Level;
-import ru.mipt.bit.platformer.playobjects.StateObject;
+import ru.mipt.bit.platformer.playobjects.StaticObject;
 import ru.mipt.bit.platformer.playobjects.DynamicObject;
 
 import java.io.*;
@@ -14,7 +14,7 @@ import static ru.mipt.bit.platformer.game_data.ConstantSettings.*;
 
 public class FromFileLevel implements CreateLevel {
     private final ArrayList<ArrayList<String>> scheme;
-    private static HashMap<String, TypeGameObjects> notations = new HashMap<>();
+    private final static HashMap<String, TypeGameObjects> notations = new HashMap<>();
 
     static {
         notations.put("T", TypeGameObjects.TREE);
@@ -53,9 +53,9 @@ public class FromFileLevel implements CreateLevel {
                     TypeGameObjects type = notations.get(scheme.get(i).get(j));
                     GlobalTypeOfObject typeOfObject = GLOBAL_TYPES_OF_OBJECTS.get(type);
                     if (typeOfObject.equals(GlobalTypeOfObject.STATIC)) {
-                        level.staticObstacles.add(new StateObject(new GridPoint2(j, WINDOW_HEIGHT - i - 1), type));
+                        level.addStaticObstacles(new StaticObject(new GridPoint2(j, WINDOW_HEIGHT - i - 1), type));
                     } else if (typeOfObject.equals(GlobalTypeOfObject.DYNAMIC)) {
-                        level.dynamicObjects.add(new DynamicObject(new GridPoint2(j, WINDOW_HEIGHT - i - 1), 0f, type));
+                        level.addDynamicObject(new DynamicObject(new GridPoint2(j, WINDOW_HEIGHT - i - 1), 0f, type));
                     }
                 }
             }

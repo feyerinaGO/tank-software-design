@@ -12,15 +12,15 @@ class ContextLevelTest {
     @Test
     void getLevelRandomTest() {
         Level level = ContextLevel.getLevel(VariantLevel.RANDOM);
-        boolean size = level.staticObstacles.size() > 0 && level.staticObstacles.size() < 13;
+        boolean size = level.getStaticObstacles().size() > 0 && level.getStaticObstacles().size() < 13;
         assertTrue(size, "Wrong number of obstacles!");
-        assertEquals(level.dynamicObjects.size(), COUNT_ENEMIES + COUNT_PLAYERS, "Wrong number of obstacles!");
+        assertEquals(level.getDynamicObjects().size(), COUNT_ENEMIES + COUNT_PLAYERS, "Wrong number of obstacles!");
     }
 
     @Test
     void getLevelFromFileTest() {
         Level level = ContextLevel.getLevel(VariantLevel.FROM_FILE);
-        assertEquals(level.staticObstacles.size(), 15, "Wrong number of obstacles!");
-        assertEquals(level.dynamicObjects.size(), 4, "Wrong number of tanks!");
+        assertEquals(level.getStaticObstacles().size(), 15, "Wrong number of obstacles!");
+        assertEquals(level.getDynamicObjects().size(), 4, "Wrong number of tanks!");
     }
 }

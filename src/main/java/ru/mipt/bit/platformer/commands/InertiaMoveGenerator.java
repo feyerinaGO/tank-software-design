@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class InertiaMoveGenerator implements CommandGenerator {
-        private Level level;
+        private final Level level;
 
         public InertiaMoveGenerator(Level level) {
             this.level = level;
@@ -19,7 +19,7 @@ public class InertiaMoveGenerator implements CommandGenerator {
         @Override
         public Collection<Command> generateCommands() {
             List<Command> commandList = new ArrayList<>();
-            for (DynamicObject dynamic : level.dynamicObjects) {
+            for (DynamicObject dynamic : level.getDynamicObjects()) {
                 if (dynamic.position.getType().equals(TypeGameObjects.BULLET)) {
                     commandList.add(new MoveCommand(Direction.getDirectionByRotation(dynamic.position.rotation), dynamic, level));
                 }

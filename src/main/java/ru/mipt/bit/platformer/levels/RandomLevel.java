@@ -2,7 +2,7 @@ package ru.mipt.bit.platformer.levels;
 import com.badlogic.gdx.math.GridPoint2;
 import ru.mipt.bit.platformer.game_data.TypeGameObjects;
 import ru.mipt.bit.platformer.playobjects.Level;
-import ru.mipt.bit.platformer.playobjects.StateObject;
+import ru.mipt.bit.platformer.playobjects.StaticObject;
 import ru.mipt.bit.platformer.playobjects.DynamicObject;
 
 import java.util.ArrayList;
@@ -20,20 +20,26 @@ public class RandomLevel implements CreateLevel{
     @Override
     public Level getLevel() {
         Level level = new Level();
-        level.staticObstacles = getObstacles();
-        level.dynamicObjects = getPlayers();
-        level.dynamicObjects.addAll(getEnemies());
+        for (StaticObject state: getObstacles()) {
+            level.addStaticObstacles(state);
+        }
+        for (DynamicObject dynamic: getPlayers()) {
+            level.addDynamicObject(dynamic);
+        }
+        for (DynamicObject dynamic: getEnemies()) {
+            level.addDynamicObject(dynamic);
+        }
         return level;
     }
-    private ArrayList<StateObject> getObstacles() {
-        ArrayList<StateObject> obstacles = new ArrayList<>();
+    private ArrayList<StaticObject> getObstacles() {
+        ArrayList<StaticObject> obstacles = new ArrayList<>();
         int count = ThreadLocalRandom.current().nextInt(1, (int) (0.15* WINDOW_WIDTH * WINDOW_HEIGHT) + 1);
         while (obstacles.size() < count) {
             int x = ThreadLocalRandom.current().nextInt(1, WINDOW_WIDTH + 1);
             int y = ThreadLocalRandom.current().nextInt(1, WINDOW_HEIGHT + 1);
             GridPoint2 newVar = new GridPoint2(x, y);
             if (!objects.contains(newVar)) {
-                obstacles.add(new StateObject(newVar, TypeGameObjects.TREE));
+                obstacles.add(new StaticObject(newVar, TypeGameObjects.TREE));
                 objects.add(newVar);
             }
         }

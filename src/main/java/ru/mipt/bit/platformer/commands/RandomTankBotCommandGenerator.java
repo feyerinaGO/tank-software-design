@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RandomTankBotCommandGenerator implements CommandGenerator {
-    private Level level;
+    private final Level level;
 
     public RandomTankBotCommandGenerator(Level level) {
         this.level = level;
@@ -19,7 +19,7 @@ public class RandomTankBotCommandGenerator implements CommandGenerator {
     @Override
     public Collection<Command> generateCommands() {
         List<Command> commandList = new ArrayList<>();
-        for (DynamicObject dynamic : level.dynamicObjects) {
+        for (DynamicObject dynamic : level.getDynamicObjects()) {
             if (dynamic.position.getType().equals(TypeGameObjects.ENEMY)) {
                 commandList.add(new MoveCommand(getRandomDirection(dynamic), dynamic, level));
                 if (getRandomShoot()) {

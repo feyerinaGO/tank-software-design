@@ -12,8 +12,8 @@ class RandomLevelTest {
     @Test
     void getLevelTest() {
         var level = randomLevel.getLevel();
-        boolean size = level.staticObstacles.size() > 0 && level.staticObstacles.size() < 13;
+        boolean size = level.getStaticObstacles().size() > 0 && level.getStaticObstacles().size() < 13;
         assertTrue(size, "Wrong number of obstacles!");
-        assertEquals(level.dynamicObjects.size(), COUNT_ENEMIES + COUNT_PLAYERS, "Wrong number of obstacles!");
+        assertEquals(level.getDynamicObjects().size(), COUNT_ENEMIES + COUNT_PLAYERS, "Wrong number of obstacles!");
     }
 }
