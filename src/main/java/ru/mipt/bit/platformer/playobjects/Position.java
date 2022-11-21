@@ -8,17 +8,9 @@ import static ru.mipt.bit.platformer.game_data.ConstantSettings.HEALTHY_START;
 public class Position {
     public GridPoint2 coordinates;
     public float rotation = 0f;
-
     private int healthLevel;
-
-    public int getMaxHealthLevel() {
-        return maxHealthLevel;
-    }
-
     private final int maxHealthLevel;
-
     private boolean needDecrease = false;
-
     private final TypeGameObjects type;
 
     public Position(GridPoint2 coordinates, float rotation, TypeGameObjects type) {
@@ -50,6 +42,10 @@ public class Position {
 
     public void setNeedDecrease(boolean needDecrease) {
         this.needDecrease = needDecrease;
+    }
+
+    public int getMaxHealthLevel() {
+        return maxHealthLevel;
     }
 
 }

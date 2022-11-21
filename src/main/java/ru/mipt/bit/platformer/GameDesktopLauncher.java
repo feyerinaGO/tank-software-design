@@ -6,11 +6,13 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.MapRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.Rectangle;
 import ru.mipt.bit.platformer.commands.*;
 import ru.mipt.bit.platformer.game_data.TypeGameObjects;
 import ru.mipt.bit.platformer.graphic.Graphic;
@@ -128,6 +130,7 @@ public class GameDesktopLauncher implements ApplicationListener {
         batch.begin();
 
         drawGraphicObjects(batch, graphicInTime.graphicDynamicObjects);
+        drawProgressBarForObjects(batch, graphicInTime.graphicDynamicObjects);
         drawGraphicObjects(batch, graphicInTime.graphicStaticObjects);
         // submit all drawing requests
         batch.end();
@@ -138,6 +141,27 @@ public class GameDesktopLauncher implements ApplicationListener {
             drawTextureRegionUnscaled(batch, graphic.graphics, graphic.rectangle,
                     graphic.position.rotation);
         }
+    }
+
+    private void drawProgressBarForObjects(Batch batch, List<Graphic> graphicList) {
+        if (gameLevel.isShowProgressBar()) {
+            for (Graphic graphic : graphicList) {
+                if ((graphic.position.getType().equals(TypeGameObjects.PLAYER)) ||
+                        (graphic.position.getType().equals(TypeGameObjects.ENEMY))) {
+                    graphic.setProgressBar();
+                    graphic.healthy.draw(batch, 1f);
+                    graphic.healthMax.draw(batch, 1f);
+                }
+            }
+        }
+    }
+
+    public static void drawTextureRegionUnscaled(Batch batch, TextureRegion region, Rectangle rectangle, float rotation) {
+        int regionWidth = region.getRegionWidth();
+        int regionHeight = region.getRegionHeight();
+        float regionOriginX = regionWidth / 2f;
+        float regionOriginY = regionHeight / 2f;
+        batch.draw(region, rectangle.x, rectangle.y, regionOriginX, regionOriginY, regionWidth, regionHeight, 1f, 1f, rotation);
     }
 
     @Override

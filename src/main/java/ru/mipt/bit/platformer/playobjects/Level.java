@@ -6,6 +6,7 @@ import ru.mipt.bit.platformer.events.EventType;
 import java.util.ArrayList;
 
 public class Level implements EventManager {
+    private boolean showProgressBar = false;
     private final ArrayList<StaticObject> staticObstacles = new ArrayList<>();
     private final ArrayList<DynamicObject> dynamicObjects = new ArrayList<>();
     private final ArrayList<EventListener> listeners = new ArrayList<>();
@@ -43,6 +44,13 @@ public class Level implements EventManager {
         for (DynamicObject dynamicObject : forRemove) {
             removeDynamicObject(dynamicObject);
         }
+    }
+    public boolean isShowProgressBar() {
+        return showProgressBar;
+    }
+
+    public void setShowProgressBar(boolean showProgressBar) {
+        this.showProgressBar = showProgressBar;
     }
 
     @Override

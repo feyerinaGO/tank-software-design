@@ -13,8 +13,8 @@ import static com.badlogic.gdx.Input.Keys.*;
 import static com.badlogic.gdx.Input.Keys.D;
 
 public class UserInputBasedCommandGenerator implements CommandGenerator{
-    private DynamicObject dynamicObject;
-    private Level level;
+    private final DynamicObject dynamicObject;
+    private final Level level;
 
     public UserInputBasedCommandGenerator(DynamicObject dynamicObject, Level level) {
         this.level = level;
@@ -35,6 +35,9 @@ public class UserInputBasedCommandGenerator implements CommandGenerator{
         }
         if (Gdx.input.isKeyJustPressed(SPACE)) {
             commandList.add(new ShootCommand(dynamicObject, level));
+        }
+        if (Gdx.input.isKeyJustPressed(L)) {
+            commandList.add(new ShowHideProgressBarCommand(level));
         }
         return commandList;
     }
